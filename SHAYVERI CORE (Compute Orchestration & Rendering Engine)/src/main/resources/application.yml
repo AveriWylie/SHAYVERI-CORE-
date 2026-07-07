@@ -1,0 +1,20 @@
+spring:
+  application.name: shayveri-core
+  data:
+    mongodb.uri: mongodb://localhost:27017/shayveri
+    redis: { host: localhost, port: 6379 }
+  threads.virtual.enabled: true
+
+shayveri:
+  security:
+    api-keys:
+      roblox: ${SHAYVERI_KEY_ROBLOX:dev-roblox-key}
+      node:   ${SHAYVERI_KEY_NODE:dev-node-key}
+      dash:   ${SHAYVERI_KEY_DASH:dev-dash-key}
+  opencloud:
+    api-key: ${ROBLOX_OPENCLOUD_KEY:}
+    universe-id: ${ROBLOX_UNIVERSE_ID:}
+    topic: shayveri-config
+
+management:
+  endpoints.web.exposure.include: health,metrics,prometheus
