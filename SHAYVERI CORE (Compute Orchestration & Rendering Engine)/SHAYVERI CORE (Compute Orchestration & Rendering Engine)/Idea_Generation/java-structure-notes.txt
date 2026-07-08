@@ -1,0 +1,110 @@
+JAVA / CS NOTES ON THE FOLDER STRUCTURE (local only, git-ignored)
+==================================================================
+The PDF covers what each folder is FOR. These notes cover the Java and
+general CS mechanics UNDERNEATH the structure - the "why does Java itself
+force this shape" layer.
+
+1. THE COMPILATION MODEL (why src/ and build/ exist at all)
+-----------------------------------------------------------
+Java is a compiled language, but it compiles to bytecode, not machine code:
+
+    Main.java  --(javac / Gradle compileJava)-->  Main.class  --(JVM)--> runs
+
+.java files are human source. .class files are bytecode the JVM executes.
+That is the entire reason src/ (what you write) and build/ (what the
+compiler emits) are separate trees. build/classes/java/main/... mirrors
+src/main/java/... exactly, one .class per class, because the JVM locates a
+compiled class by turning its package name into a path at load time too.
+Source path in, identical class path out.
+
+2. THE CLASSPATH (the invisible concept holding everything together)
+---------------------------------------------------------------------
+When the JVM runs, it resolves every class it needs by searching an ordered
+list of locations called the classpath. For this project the classpath is:
+
+    build/classes/java/main   (your compiled code)
+    build/resources/main      (application.yml etc., copied from resources/)
+    ~100 dependency jars      (Spring, Jackson, drivers - from Gradle's cache)
+
+Three structure facts fall out of this:
+  - src/main/resources exists because anything in it is copied onto the
+    classpath, which is how Spring finds application.yml at startup without
+    being given a file path.
+  - A jar file is literally just a zip of a compiled folder tree plus
+    metadata. gradle-wrapper.jar, every Spring jar - all just zipped
+    class-name-as-path trees. Unzip one and you will see the same
+    org/springframework/... folder nesting.
+  - "It compiles in the IDE but not in Gradle" almost always means the two
+    disagree about the classpath.
+
+3. PACKAGE = FOLDER, AND THE COMPILER ENFORCES IT
+--------------------------------------------------
+Line 1 of every source file declares its package, and javac refuses to
+compile if the declaration does not match the folder path:
+
+    package dev.shayveri.core.common;   <- must live in dev/shayveri/core/common/
+
+This is a namespacing system (same CS idea as Python modules or C++
+namespaces). The fully qualified name of the ping controller is
+dev.shayveri.core.common.PingController; the short name PingController is
+just what you type after an import. Reverse-domain prefixes exist because
+package names are global: if two jars both contained a class named
+util.Helper, the JVM could only see one of them (a real problem called
+"classpath hell" - so everyone namespaces by domain they control).
+
+4. ONE PUBLIC CLASS PER FILE, FILE NAMED AFTER IT
+--------------------------------------------------
+Java requires a public class to live in a file with exactly its name:
+PingController must be in PingController.java. That is why Java projects
+have many small files instead of a few big ones - the language mandates it.
+This plus packages-as-folders means the folder tree IS the program's
+namespace diagram; you can read the architecture from `ls -R src`.
+
+5. WHY CoreApplication.java SITS AT THE PACKAGE ROOT (not in a subfolder)
+--------------------------------------------------------------------------
+Not style - mechanics. @SpringBootApplication turns on component scanning:
+at startup Spring searches for annotated classes (@RestController, etc.)
+in the package containing that class AND all packages below it. Because
+CoreApplication sits at dev.shayveri.core, everything under core/ (common/,
+config/, all seven modules) gets discovered automatically. If it sat in
+dev.shayveri.core.config, Spring would never find dev.shayveri.core.ingress.
+The entry point's position in the tree defines the discovery boundary.
+
+6. src/test MIRRORS src/main (same package trick, second classpath)
+--------------------------------------------------------------------
+Tests live in src/test/java under the SAME package names as the code they
+test: the future test for ingress code goes in
+src/test/java/dev/shayveri/core/ingress/. Two reasons:
+  - Same-package classes can access each other's package-private members
+    (Java's fourth, default visibility level besides public/protected/
+    private), so tests can reach things outsiders cannot.
+  - Gradle compiles tests on a separate classpath (main classes + test-only
+    libraries like JUnit), which is why JUnit exists at test time but never
+    ships inside the real application.
+
+7. NAMING CONVENTIONS THE STRUCTURE FOLLOWS
+--------------------------------------------
+  - Packages: all lowercase, no underscores (dev.shayveri.core.ingress)
+  - Classes/files: PascalCase nouns (ApiKeyAuthFilter.java)
+  - Methods/fields: camelCase (doFilterInternal)
+  - Constants: UPPER_SNAKE (HEADER)
+These are convention, not compiler-enforced (unlike package=folder), but
+every Java reader expects them; breaking them reads as loudly as a typo.
+
+8. WHERE THE ~100 DEPENDENCY JARS ACTUALLY LIVE
+------------------------------------------------
+Not in the project. Gradle keeps one shared cache per machine at
+~/.gradle/caches/, and every project on the machine points into it. That is
+why the repo stays small, why the first build was slow (downloading) and
+later builds are fast, and why deleting a project never deletes libraries.
+The project's .gradle/ folder (gitignored) only holds per-project state:
+which tasks ran, file hashes for incremental builds.
+
+9. GRADLE TASKS AS A DAG (the CS bit)
+--------------------------------------
+Gradle models the build as a directed acyclic graph of tasks:
+compileJava -> processResources -> classes -> jar/bootRun/test. Each task
+declares inputs and outputs, hashes them, and skips itself if nothing
+changed ("UP-TO-DATE" in the output). That is incremental compilation, and
+it is the same core idea as make from 1976, with the dependency graph
+extended to library resolution.
