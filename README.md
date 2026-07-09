@@ -1,50 +1,52 @@
 # SHAYVERI CORE
 
-**Compute Orchestration & Rendering Engine** - the Java backend for the SHAYVERI Roblox pipeline.
+**SHAYVERI CORE** (Compute Orchestration & Rendering Engine) is the Spring Boot backend of the SHAYVERI Roblox pipeline: it ingests live game telemetry, orchestrates optimization jobs across lab compute nodes, and manages versioned live-game config pushed via Roblox Open Cloud. Runs standalone with just Docker (Mongo + Redis).
 
-CORE is the single source of truth for the whole system. Roblox game servers and lab compute nodes are *clients* of CORE: they push data in and poll/receive config out. The React dashboard is a read/write control surface over WebSocket + REST. CORE is the only component that talks to the Roblox Open Cloud API.
+CORE is the single source of truth for the whole system. Roblox game servers and lab compute nodes are clients that push data in and poll/receive config out; a React dashboard is the read/write control surface over WebSocket + REST; CORE alone talks to the Roblox Open Cloud API.
 
----
+## Quick Start
 
-## Table of Contents
+Prerequisites: Java 21, Docker.
 
-- [System Context](#system-context)
-- [Non-Goals (v1)](#non-goals-v1)
-- [Tech Stack](#tech-stack)
-- [Getting Started](#getting-started)
-- [Project Layout](#project-layout)
-- [Security Model](#security-model)
-- [Configuration](#configuration)
-- [Module Plan](#module-plan)
-  - [Module 1 - Ingress (Telemetry Intake)](#module-1---ingress-telemetry-intake)
-  - [Module 2 - Nodes (Lab Compute Registry)](#module-2---nodes-lab-compute-registry)
-  - [Module 3 - Jobs (Pipeline Queue & Lifecycle)](#module-3---jobs-pipeline-queue--lifecycle)
-  - [Module 4 - Overrides (Game Config Control Plane)](#module-4---overrides-game-config-control-plane)
-  - [Module 5 - Egress (Roblox Open Cloud Client)](#module-5---egress-roblox-open-cloud-client)
-  - [Module 6 - Realtime (Dashboard WebSocket Hub)](#module-6---realtime-dashboard-websocket-hub)
-  - [Module 7 - Observability & Audit](#module-7---observability--audit)
-- [Build Order & Milestones](#build-order--milestones)
-- [Development Rules](#development-rules)
-- [Deferred / v2 Ideas](#deferred--v2-ideas)
+```bash
+docker compose up -d        # start local MongoDB + Redis
+./gradlew bootRun           # boot the service
 
----
-
-## System Context
-
-```
-[ Roblox Game Servers ] --HTTP--> ┌──────────────────────┐ --WebSocket--> [ React Dashboard ]
-[ Lab Compute Nodes   ] --HTTP--> │    SHAYVERI CORE     │
-                                  │  (Java / Spring Boot)│ --HTTPS--> [ Roblox Open Cloud API ]
-                                  └──────────┬───────────┘
-                                             │
-                                  [ MongoDB ]  [ Redis ]
+# verify
+curl http://localhost:8080/actuator/health
+# -> {"status":"UP"}
+curl -H "X-Api-Key: dev-dash-key" http://localhost:8080/api/ping
+# -> {"service":"shayveri-core","status":"ok"}
 ```
 
-Data flow at a glance:
+Every endpoint except `/actuator/health` requires an `X-Api-Key` header. Dev keys: `dev-roblox-key` (game servers), `dev-node-key` (lab nodes), `dev-dash-key` (dashboard). Production keys come from environment variables and are never committed.
 
-- **Roblox game servers** POST telemetry (snapshots, events) into CORE every ~10 seconds and poll for active config.
-- **Lab compute nodes** (~9 machines) register with CORE, heartbeat every 15 seconds, and claim pipeline jobs (texture bakes, mesh optimization, light bakes, pathfinding pre-compute).
-- **The React dashboard** subscribes over STOMP WebSocket for live state and issues mutations (create jobs, edit config) over REST.
+## Layout
+
+```
+src/main/java/dev/shayveri/core/   the service, package-by-module:
+  common/ config/                  shared pieces + Spring configuration
+  ingress/ nodes/ jobs/ overrides/ egress/ realtime/ observability/
+                                   one folder per module (see the plan)
+Idea_Generation/plan.txt           THE PLAN: full module specs, milestones,
+                                   acceptance criteria
+```
+
+## Status
+
+| Phase | Scope | State |
+|---|---|---|
+| 0 | Scaffold, security filter, dev infra, `/api/ping` | Done (boot verification pending Docker install) |
+| 1 | Telemetry ingress + live WebSocket feed | Next |
+| 2 | Node registry + job queue | - |
+| 3 | Config control plane + Open Cloud push | - |
+| 4 | Observability + hardening | - |
+
+## Documentation
+
+- **The plan** (module specs, contracts, milestones): `Idea_Generation/plan.txt`
+- Module 1 construction blueprint: `Idea_Generation/docs/module1_blueprint.txt`
+- Pre-Phase-1 summary (structure, decisions, gitignore explained): `Idea_Generation/PrePhase1_Summary.pdf`
 - **CORE pushes to Roblox Open Cloud** (Messaging Service) so config activations reach live servers instantly, with the poll path as guaranteed fallback.
 
 ## Non-Goals (v1)
