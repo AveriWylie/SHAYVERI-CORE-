@@ -4,6 +4,14 @@
 
 CORE is the single source of truth for the whole system. Roblox game servers and lab compute nodes are clients that push data in and poll/receive config out; a React dashboard is the read/write control surface over WebSocket + REST; CORE alone talks to the Roblox Open Cloud API.
 
+## Research strand
+
+This repository doubles as the substrate for an ongoing research program on **dynamic compute-density** — modulating an LLM agent (Claude) across different "focus modes" the way a human varies focus, measured through an external token/time lens. The scaffolding-and-documentation work here is the low-stakes busy-work the experiment runs on; the implementation is kept human-side by design (the offload principle). Start here:
+
+- **Usage guide + experiment log** (readable PDF): `Idea_Generation/ClaudeUsageGuide.pdf` — the transferable guide (seven levers, recipes, failure modes) plus the append-only iteration log (the data).
+- **Live dashboard** (open in a browser): `Idea_Generation/dashboard.html` — iterations, the temporal model (τ, ρ), the failure-signal board, file index.
+- **Source of truth** (append-only text I log to each iteration): `Idea_Generation/claude-usage-guide.txt`.
+
 ## Quick Start
 
 Prerequisites: Java 21, Docker.
@@ -44,6 +52,12 @@ Idea_Generation/plan.txt           THE PLAN: full module specs, milestones,
 
 ## Documentation
 
+Research (the compute-density program):
+- **Usage guide + experiment log**: `Idea_Generation/ClaudeUsageGuide.pdf` (source: `claude-usage-guide.txt`)
+- **Dashboard**: `Idea_Generation/dashboard.html`
+
+Project (the SHAYVERI build):
 - **The plan** (module specs, contracts, milestones): `Idea_Generation/plan.txt`
-- Module 1 construction blueprint: `Idea_Generation/docs/module1_blueprint.txt`
+- Construction blueprints, one per module: `Idea_Generation/docs/module1–7_blueprint.txt`
 - Pre-Phase-1 summary (structure, decisions, gitignore explained): `Idea_Generation/PrePhase1_Summary.pdf`
+- Java/CS structure notes (local, git-ignored): `Idea_Generation/java-structure-notes.txt`
