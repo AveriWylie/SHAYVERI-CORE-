@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Compute-Density Experiment &middot; Dashboard</title>
+<style>
+  :root{
+    --bg:#ffffff; --fg:#1a1a1a; --muted:#6b6b6b; --line:#e2e2e2; --card:#f7f7f7; --accent:#1a1a1a; --ok:#2e7d32; --na:#bdbdbd;
+  }
+  @media (prefers-color-scheme:dark){
+    :root{--bg:#161616;--fg:#ededed;--muted:#9a9a9a;--line:#2c2c2c;--card:#202020;--accent:#ededed;--ok:#6cc070;--na:#555;}
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--bg);color:var(--fg);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;font-size:14px;line-height:1.55;
+    display:flex;justify-content:center;padding:32px 18px;}
+  .dash{max-width:780px;width:100%;}
+  code{font-family:ui-monospace,Menlo,monospace;font-size:.85em;background:var(--card);padding:1px 5px;border-radius:4px;}
+  .hd{margin-bottom:20px;}
+  .hd-title{font-size:22px;font-weight:700;letter-spacing:-.01em;}
+  .hd-sub{color:var(--muted);margin-top:4px;}
+  .updated{color:var(--muted);font-size:11px;margin-top:6px;}
+  .block{border:1px solid var(--line);border-radius:11px;padding:15px 17px;margin-bottom:13px;}
+  .block-h{font-weight:650;font-size:12px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);margin-bottom:12px;}
+  .iter,.tag{font-size:10px;font-weight:600;color:var(--muted);background:var(--card);padding:1px 7px;border-radius:20px;text-transform:none;letter-spacing:0;}
+  .timeline{display:flex;flex-direction:column;}
+  .it{display:flex;gap:13px;padding:9px 0;border-bottom:1px solid var(--line);}
+  .it:last-child{border-bottom:0;}
+  .it-n{flex:0 0 27px;height:27px;border-radius:50%;background:var(--accent);color:var(--bg);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;}
+  .it-t{font-weight:650;}
+  .it-d{color:var(--muted);margin-top:1px;}
+  .row{display:flex;gap:13px;}
+  .half{flex:1;margin-bottom:13px;}
+  .eq{display:flex;flex-direction:column;margin-bottom:11px;}
+  .eq .k{font-family:ui-monospace,Menlo,monospace;font-weight:700;font-size:16px;}
+  .eq .ex{color:var(--muted);font-size:12px;margin-top:1px;}
+  .note{color:var(--muted);font-size:11.5px;border-top:1px solid var(--line);padding-top:9px;margin-top:2px;}
+  .board{list-style:none;padding:0;margin:0 0 9px;}
+  .board li{display:flex;align-items:center;gap:8px;padding:3px 0;font-size:12px;}
+  .board b{margin-left:auto;font-weight:650;}
+  .dot{width:8px;height:8px;border-radius:50%;flex:0 0 8px;}
+  .dot.ok{background:var(--ok);} .dot.na{background:var(--na);}
+  .levers{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px;}
+  .lv{background:var(--card);border-radius:7px;padding:8px 10px;font-size:12px;}
+  .lv b{font-family:ui-monospace,Menlo,monospace;margin-right:6px;}
+  .files{display:flex;flex-direction:column;}
+  .f{display:flex;justify-content:space-between;gap:12px;padding:6px 0;border-bottom:1px solid var(--line);font-size:12px;}
+  .f:last-child{border-bottom:0;}
+  .f-n{font-family:ui-monospace,Menlo,monospace;font-weight:600;}
+  .f-d{color:var(--muted);text-align:right;}
+  @media (max-width:560px){.row{flex-direction:column;}}
+</style>
+</head>
+<body>
+<div class="dash">
+  <header class="hd">
+    <div class="hd-title">Compute-Density Experiment</div>
+    <div class="hd-sub">Modulating an LLM agent the way a human modulates focus &middot; log in <code>claude-usage-guide.txt</code></div>
+    <div class="updated">Static snapshot &mdash; regenerated on request. Iteration 4.</div>
+  </header>
+
+  <section class="block">
+    <div class="block-h">Iterations so far</div>
+    <div class="timeline">
+      <div class="it"><div class="it-n">1</div><div><div class="it-t">Production run</div><div class="it-d">Levers L1&ndash;L7, decision log D0&ndash;D5. Rejected wall-clock stretching. <span class="tag">output: 6 blueprints (modules 2&ndash;7)</span></div></div></div>
+      <div class="it"><div class="it-n">2</div><div><div class="it-t">Break-report</div><div class="it-d">Flagged 2 architectural breaks (introspection, self-certification); resolved via density proxy + signal board.</div></div></div>
+      <div class="it"><div class="it-n">3</div><div><div class="it-t">Temporal conversion</div><div class="it-d">Defined proper-time &tau; = R+O, shrink factor k = &tau;/T&#8341;, and the 2-D correction.</div></div></div>
+      <div class="it"><div class="it-n">4</div><div><div class="it-t">Necessary conclusion</div><div class="it-d">Comparison forced to be an external-behavioral science. DP structure of the flow noted.</div></div></div>
+    </div>
+  </section>
+
+  <div class="row">
+    <section class="block half">
+      <div class="block-h">The temporal model</div>
+      <div class="eq"><span class="k">&tau; = R + O</span><span class="ex">machine proper-time (reasoning + output tokens) &mdash; the only true sequential clock</span></div>
+      <div class="eq"><span class="k">k = &tau; / T&#8341;</span><span class="ex">shrink factor to human task-time (T&#8341; owned by you)</span></div>
+      <div class="eq"><span class="k">&rho; = R / O</span><span class="ex">deliberation density &mdash; intensity, independent of &tau;</span></div>
+      <div class="note">A task is a trajectory &rho;(&tau;), not a point. Wall-clock rejected: per-token latency is ~constant, so seconds are decoupled from effort.</div>
+    </section>
+    <section class="block half">
+      <div class="block-h">Failure-signal board <span class="iter">iter 4</span></div>
+      <ul class="board">
+        <li><span class="dot ok"></span> S1 experiment leaking to object files <b>unlit</b></li>
+        <li><span class="dot ok"></span> S2 instrument calibrating itself <b>cleared</b></li>
+        <li><span class="dot ok"></span> S3 fabricated introspective value <b>unlit</b></li>
+        <li><span class="dot ok"></span> S4 self-certification of success <b>redefined out</b></li>
+        <li><span class="dot na"></span> S5 monotonic-improvement violation <b>N/A</b></li>
+      </ul>
+      <div class="note">No obstructing signal lit, conditioned on the token-ratio proxy.</div>
+    </section>
+  </div>
+
+  <section class="block">
+    <div class="block-h">The seven levers</div>
+    <div class="levers">
+      <div class="lv"><b>L1</b> Pattern amortization</div>
+      <div class="lv"><b>L2</b> Batching in-session</div>
+      <div class="lv"><b>L3</b> Selective depth</div>
+      <div class="lv"><b>L4</b> Model choice per task</div>
+      <div class="lv"><b>L5</b> Session hygiene</div>
+      <div class="lv"><b>L6</b> Background / cron</div>
+      <div class="lv"><b>L7</b> Pre-authorized scope</div>
+    </div>
+  </section>
+
+  <section class="block">
+    <div class="block-h">Where everything lives &middot; <code>Idea_Generation/</code></div>
+    <div class="files">
+      <div class="f"><span class="f-n">claude-usage-guide.txt</span><span class="f-d">the guide + experiment log (this data)</span></div>
+      <div class="f"><span class="f-n">plan.txt</span><span class="f-d">the build plan (contract)</span></div>
+      <div class="f"><span class="f-n">docs/module1&ndash;7_blueprint.txt</span><span class="f-d">object-level deliverables</span></div>
+      <div class="f"><span class="f-n">PrePhase1_Summary.pdf</span><span class="f-d">structure + APIs + gitignore</span></div>
+      <div class="f"><span class="f-n">java-structure-notes.txt</span><span class="f-d">local only (git-ignored)</span></div>
+    </div>
+  </section>
+</div>
+</body>
+</html>

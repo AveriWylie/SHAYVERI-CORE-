@@ -23,6 +23,10 @@ public class SecurityConfig {
 				.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 				.authorizeHttpRequests(auth -> auth
 						.requestMatchers("/actuator/health").permitAll()
+						// TODO(averi, A8 step 4): telemetry is ROBLOX-only. Add, ABOVE anyRequest:
+						//   .requestMatchers("/api/telemetry/**").hasRole("ROBLOX")
+						// Rule order matters: first match wins, so specific rules go before
+						// anyRequest(). This line is why the controller never checks identity.
 						.anyRequest().authenticated())
 				.addFilterBefore(new ApiKeyAuthFilter(apiKeyProperties), UsernamePasswordAuthenticationFilter.class);
 
