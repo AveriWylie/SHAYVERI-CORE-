@@ -13,7 +13,14 @@ import java.util.List;
  * Given complete (interfaces are contracts, and this one's exactness is
  * what the whole rule-5 design hangs on). Implementing it is A6.
  */
+
 public interface TelemetryStore {
+
+	// Java interface - contract; see java notes
+	// just saying what paramaters must be
+	// What its specifying for implementation
+	// void         saveSnapshot(TelemetrySnapshot snapshot);
+	// └─ returns   └─ name       └─ what you must pass in
 
 	void saveSnapshot(TelemetrySnapshot snapshot);
 

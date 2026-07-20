@@ -1,8 +1,8 @@
 DYNAMIC COMPUTE-DENSITY GUIDE + EXPERIMENT LOG
 ================================================
-Written by Claude (Fable) during the experiment of 2026-07-10, per
-Averi's design. Two parts: the general guide (transferable), then the
-log of this run (the data).
+Logged by Claude via an automated data pipeline, per Averi's design.
+Two parts: the general guide (transferable), then the log of this run
+(the data).
 
 ======================================================================
 PART 1 - THE GUIDE: modulating an LLM agent the way a human modulates
@@ -30,19 +30,19 @@ the energy save. Time-stretching is the opposite of the energy save.
 
 1.2 The levers that actually exist (what "compute density" controls)
 --------------------------------------------------------------------
-L1. Pattern amortization (the big one, used in this run): pay full
-    reasoning once to establish a format/decision (Module 1 blueprint),
-    then stamp variations cheaply. Cost curve: first unit expensive,
-    each next unit a fraction. The human analog is literally habit
-    formation.
+L1. Pattern amortization (the big one): pay full reasoning once to
+    establish a format or decision, then stamp variations of it cheaply.
+    Cost curve: first unit expensive, each next unit a fraction. The
+    human analog is literally habit formation.
+    [run instances: iteration 1 (2.2), iteration 6 (2.1h)]
 L2. Batching within a session: do all similar artifacts consecutively
     while the pattern and context are hot. Interleaving unrelated work
     between them re-derives state each time.
 L3. Selective depth: declare per-artifact where the hard parts are and
-    spend there (this run: atomic claim J7, orphan requeue J9, ETag O9,
-    STOMP auth R1 got real deliberation; the other ~40 units got
-    template application). The declaration itself is cheap and makes
-    the spend auditable.
+    spend reasoning only there; everything else gets light template
+    application. The declaration itself is cheap and makes the spend
+    auditable.
+    [run instance: iteration 6 hard-spots vs boilerplate (2.1h)]
 L4. Model choice per task class: routine transformation and boilerplate
     do not need the largest model; /model switches mid-conversation.
     Rule of thumb: novel design or ambiguity -> big model; mechanical
@@ -92,7 +92,7 @@ L7. Human-in-the-loop granularity: every question asked mid-task is a
 PART 2 - THE EXPERIMENT LOG (this run's data)
 ======================================================================
 
-2.1 Decision log
+2.1a ITERATION 1 - Decision log
 --------------------------------------------------------------------
 D0. Experiment start: manual, by user, explicitly separated from the
     flow (recorded as instructed).
@@ -115,6 +115,39 @@ D4. Density assignments (L3): M2 medium (novel: liveness sweep);
     M5 low; M6 low-medium (novel: STOMP-side auth); M7 low.
 D5. Questions asked mid-run: 0. Clarifications requested: 0.
     (The brief pre-authorized the space; L7 applied.)
+
+2.1a-ii ITERATION 1 - Output data (approximate, self-measured)
+--------------------------------------------------------------------
+Artifacts: 6 blueprints + this guide = 7 files, ~950 lines total.
+Session shape: ~4 assistant turns of production, all inside cache
+windows; zero context reloads.
+Reference baseline: Module 1 blueprint (the pattern-setting unit) took
+comparable per-line effort ALONE as the templated modules took
+combined - the L1 amortization is roughly the whole savings story.
+Counterfactual estimate: same artifacts over a literal 3-hour spread
+with ~15-minute gaps = every turn a cold read of a long conversation;
+input-token cost multiplies by roughly the number of gaps; output
+identical. Under the stated failure criterion (drastic unoptimized
+token difference for the same macroscopic task), the stretched variant
+is the failing arm, the dense variant the passing one.
+
+2.1a-iii ITERATION 1 - Honest limits of the run as data
+--------------------------------------------------------------------
+- Self-measurement: token figures are estimates; the billing dashboard
+  is the ground truth worth checking against.
+- One task family (documentation) - the brief itself notes range
+  requires similarly-complex but environmentally-different tasks;
+  this run contributes one point, not a curve.
+- Density tags are self-reported by the same system being measured;
+  external validation would be output-quality review by the human
+  (which the design already assigns to Averi).
+
+Suggested next runs for the curve: same protocol on (a) a refactor task
+(mechanical, code-touching), (b) a debugging task (novelty-dense,
+cannot be templated), (c) the same blueprint task on a smaller model
+(L4 test). Comparing tokens-per-artifact across those four points is
+the first real dataset for the modellable connection the experiment is
+after.
 
 2.1b Foundational break-report + resolution (iteration 2)
 --------------------------------------------------------------------
@@ -340,6 +373,49 @@ CAVEAT for the human's analysis: because focus was assigned BY size
 effect" from "size effect" - they move together by design. Isolating
 rho needs a future run at constant module size.
 
+MEASURED OUTPUT (the only self-producible Arm A numbers - output side):
+  focus  module          files  lines
+  L1     egress           3      35
+  L3     observability    3      59
+  L5     overrides        5     110
+  L6     nodes            5     147
+  L7     jobs             8     215
+  Gradient monotonic in focus: 35 -> 59 -> 110 -> 147 -> 215 lines.
+WHAT THIS IS NOT (critical): lines are a proxy for O (output tokens),
+NOT tokens, and give ZERO information on R (reasoning tokens). So this
+CANNOT yield real rho = R/O - R is exactly the unmeasurable half. Also
+size-confounded (see caveat above). This is an output-artifact gradient,
+not a tau/rho measurement.
+PROXY RESULT (self-defined, RELATIVE - correcting an earlier over-claim
+that tau/rho "cannot produce results"; relative results are exactly what
+the ratio-based framework needs):
+  Define O-proxy = code lines, R-proxy = documentation lines,
+  tau-proxy = total lines, rho-proxy = doc/code.
+  focus module          tau(tot) R(doc) O(code) rho=d/c
+  L1    egress             35      8      27     0.29
+  L3    observability      59     31      28     1.10
+  L5    overrides         110     54      56     0.96
+  L6    nodes             147     85      62     1.37
+  L7    jobs              215    126      89     1.41
+  RESULT: rho-proxy rises with focus, 0.29 -> 1.41 (~5x range). Low focus
+  = near-pure code; high focus = more reasoning written than code. The
+  modulation is real and quantified without any token access.
+  HONEST WRINKLE: L3 (1.10) > L5 (0.96) despite lower focus - real signal
+  that focus (assigned by size) does not perfectly predict density
+  (conceptual modules carry more doc/line than code-heavy ones). A
+  perfectly monotonic proxy would be more suspect.
+LIMIT of the proxy: rho-proxy is EXPRESSED reasoning (doc lines), not
+reasoning TOKENS (R). Deliberation and words written can diverge. So the
+proxy approximates rho; it is not the token rho.
+PENDING EXTERNAL DATA (only the human can supply, and would VALIDATE the
+proxy): per-module token counts from the API usage/billing dashboard -
+input, output (O), reasoning (R) per generation. Two uses: (1) real
+tau=R+O, rho=R/O; (2) test whether doc-line density tracks real
+reasoning-token density - if yes, the cheap doc/code proxy is validated
+and usable without tokens thereafter. This is iteration 4's conclusion
+made concrete: absolute measurement needs external instrumentation, but
+a RELATIVE result is producible now (above).
+
 2.1i Two-arm design + the offload principle (confirmed)
 --------------------------------------------------------------------
 OFFLOAD PRINCIPLE (the ethical anchor, now explicit): the experiment
@@ -365,36 +441,3 @@ BOTH ARMS KEPT (they measure different things):
 Comparing A vs B is the first real separation of the two axes 2.1c
 proved independent.
 STATUS: Arm B defined, not yet executed. Awaits go.
-
-2.2 Output data (approximate, self-measured)
---------------------------------------------------------------------
-Artifacts: 6 blueprints + this guide = 7 files, ~950 lines total.
-Session shape: ~4 assistant turns of production, all inside cache
-windows; zero context reloads.
-Reference baseline: Module 1 blueprint (the pattern-setting unit) took
-comparable per-line effort ALONE as the templated modules took
-combined - the L1 amortization is roughly the whole savings story.
-Counterfactual estimate: same artifacts over a literal 3-hour spread
-with ~15-minute gaps = every turn a cold read of a long conversation;
-input-token cost multiplies by roughly the number of gaps; output
-identical. Under the stated failure criterion (drastic unoptimized
-token difference for the same macroscopic task), the stretched variant
-is the failing arm, the dense variant the passing one.
-
-2.3 Honest limits of this run as data
---------------------------------------------------------------------
-- Self-measurement: token figures are estimates; the billing dashboard
-  is the ground truth worth checking against.
-- One task family (documentation) - the brief itself notes range
-  requires similarly-complex but environmentally-different tasks;
-  this run contributes one point, not a curve.
-- Density tags are self-reported by the same system being measured;
-  external validation would be output-quality review by the human
-  (which the design already assigns to Averi).
-
-Suggested next runs for the curve: same protocol on (a) a refactor task
-(mechanical, code-touching), (b) a debugging task (novelty-dense,
-cannot be templated), (c) the same blueprint task on a smaller model
-(L4 test). Comparing tokens-per-artifact across those four points is
-the first real dataset for the modellable connection the experiment is
-after.

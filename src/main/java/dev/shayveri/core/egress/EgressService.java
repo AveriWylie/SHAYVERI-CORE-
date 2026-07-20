@@ -1,5 +1,7 @@
 package dev.shayveri.core.egress;
 
+import dev.shayveri.core.realtime.RealtimePublisher;
+
 import org.springframework.stereotype.Service;
 
 // E4 - internal API Module 4 calls. 3 attempts, backoff; final failure -> DEGRADED alert, RETURN NORMALLY (never throws).

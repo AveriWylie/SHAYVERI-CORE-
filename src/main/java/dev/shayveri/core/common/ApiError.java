@@ -1,5 +1,8 @@
 package dev.shayveri.core.common;
 
+import java.time.Instant;
+import java.util.Map;
+
 /**
  * C1 - the uniform error body every failed request returns.
  *

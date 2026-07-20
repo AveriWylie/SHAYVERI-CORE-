@@ -1,7 +1,17 @@
 package dev.shayveri.core.realtime;
 
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
+
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.messaging.converter.MappingJackson2MessageConverter;
+import org.springframework.web.socket.client.StandardWebSocketClient;
+import org.springframework.web.socket.messaging.WebSocketStompClient;
 
 /**
  * D4 - proves the broadcast path: subscribe a real STOMP client, publish,

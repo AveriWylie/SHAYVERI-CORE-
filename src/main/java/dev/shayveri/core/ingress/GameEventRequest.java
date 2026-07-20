@@ -2,6 +2,8 @@ package dev.shayveri.core.ingress;
 
 import java.time.Instant;
 import java.util.Map;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
 /**
  * A2 - one discrete event in POST /api/telemetry/events. The endpoint
@@ -21,7 +23,15 @@ import java.util.Map;
  *   jobId      @NotBlank
  *   occurredAt @NotNull    - the client-side timestamp
  *   position   (no annotation - only PLAYER_DEATH sends it)
+ *    - Nested position vector for creation of heatmaps (player deaths) later. A nested record
+ * 		maps to a nested JSON object: {"position": {"x": 1, "y": 2, "z": 3}}.
+ * 		No validation needed - if present, Jackson requires all three numbers
+ * 		to parse.
  *   data       (no annotation - optional payload)
+ *    - This is a flexible "extra information" field. again optional
+ * 		This lets the client attach arbitrary metadata without changing
+ * 		the DTO every time a new event type is introduced.
+ *
  * Plus the same compact-constructor trick as A1 to default data to Map.of().
  *
  * NOTE for the controller later (A8): to validate every element of a
@@ -30,22 +40,30 @@ import java.util.Map;
  *
  * Done when: D1 covers one event with a blank type -> violation naming "type".
  */
+
 public record GameEventRequest(
-		String type,
-		String placeId,
-		String jobId,
-		Instant occurredAt,
+		@NotBlank String type,
+		@NotBlank String placeId,
+		@NotBlank String jobId,
+		@NotNull Instant occurredAt,
+		// no validation field -> optionally in JSON request
 		Position position,
-		Map<String, Object> data
-) {
+		Map<String, Object> data) {
 
 	/**
-	 * Nested position vector for heatmaps (player deaths). A nested record
-	 * maps to a nested JSON object: {"position": {"x": 1, "y": 2, "z": 3}}.
-	 * No validation needed - if present, Jackson requires all three numbers
-	 * to parse.
+	 * Java using C legacy code - FYI
+	 * ------------------------------------------
+	 * tertiary conditional operator equivalent:
+	 *
+	 * if data == null {
+	 *     data = map.of();
+	 * } else {
+	 *     data = data; (logically = to pass)
+	 * }
+	 * ------------------------------------------
 	 */
-	public record Position(double x, double y, double z) {
+	public GameEventRequest {
+		data = data == null ? Map.of() : data;
 	}
 
-}
+) {	public record Position(double x, double y, double z) { } }

@@ -1,10 +1,16 @@
 package dev.shayveri.core.ingress;
 
 import java.util.Map;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.Positive;
 
 /**
  * A1 - the exact shape of POST /api/telemetry's JSON body. This IS the
  * contract with the Roblox-side Luau script; the plan fixes these names.
+ * We use this as a base validation layer so telemetry snapshot request is
+ * just whatwe recieve tpo validate before any use and document making.
  *
  * The components are declared (the contract is given); what is left to you
  * is the VALIDATION - the annotations that make bad payloads impossible to
@@ -36,18 +42,43 @@ import java.util.Map;
  *       customMetrics = (customMetrics == null) ? Map.of() : customMetrics;
  *   }
  *
- * (A compact constructor is record syntax: no parentheses, runs before the
- * components are assigned - the place for normalization like this.)
- *
  * Done when: the D1 validation tests pass - a missing placeId produces a
  * violation naming "placeId", a valid body produces zero violations.
+ *
+ * ------------------------------------------------------------------------
+ * A compact constructor is record syntax: no parentheses, runs before the
+ * components are assigned - in a Java record this is a streamlined syntax
+ * used to validate or normalize input arguments before they are assigned
+ * to the record's field
+ *
+ * A Java record is a concise way to define an immutable data class. The
+ * compiler automatically generates:
+ *
+ * a constructor
+ * getters (type(), placeId(), etc.)
+ * equals()
+ * hashCode()
+ * toString()
+ *
+ * So instead of writing a full POJO, you just declare the fields.
+ *
+ * This record is a Data Transfer Object (DTO) for a telemetry event
+ * sent from the game client to your backend. Each instance represents
+ * one event, and the endpoint is expected to receive a JSON array of
+ * these records.
  */
+
 public record TelemetrySnapshotRequest(
-		String placeId,
-		String jobId,
-		Integer playerCount,
-		Double serverFps,
+		@NotBlank String placeId,
+		@NotBlank String jobId,
+		@NotNull @Min(0) Integer playerCount,
+		@NotNull @Positive Double serverFps,
 		String round,
-		Map<String, Object> customMetrics)
-	{
+		Map<String, Object> customMetrics) {
+
+	// difference in indentation is conventional for looks above
+	// as its too long for horizontal we list them not at code
+	public TelemetrySnapshotRequest {
+		costomMterics = costomMetrics == null ? Map.of() : costomMetrics;
+	}
 }

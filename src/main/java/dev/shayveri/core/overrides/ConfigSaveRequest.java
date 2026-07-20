@@ -1,5 +1,7 @@
 package dev.shayveri.core.overrides;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import java.util.Map;
 
 /**

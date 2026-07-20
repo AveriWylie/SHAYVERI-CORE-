@@ -1,5 +1,7 @@
 package dev.shayveri.core.observability;
 
+import java.util.concurrent.Executor;
+
 import org.springframework.stereotype.Service;
 
 /**

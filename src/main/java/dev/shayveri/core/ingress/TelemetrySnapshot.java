@@ -1,12 +1,20 @@
 package dev.shayveri.core.ingress;
 
+import java.time.Instant;
+import java.util.Map;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.Indexed;
+
 /**
- * A3 - the persisted form of a telemetry snapshot: everything A1 carried,
- * plus the server-side receivedAt stamp. Documents are classes (not
- * records) here: Spring Data Mongo works best with a mutable class it can
- * instantiate and populate when reading back.
+ * A3 - telemtery snap shot, wrapped as an object of post shape with added
+ *      instant of when it was added handled by CORE.
+ *
+ * Documents are classes (not records) here:
+ * Spring Data Mongo works best with a mutable class it can instantiate and
+ * populate when reading back.
  *
  * Consumes (not ours) - all from Spring Data MongoDB:
+ *
  *   @Document("telemetry_snapshots")
  *              - class-level: "instances of this class live in the Mongo
  *                collection named telemetry_snapshots."
@@ -21,9 +29,13 @@ package dev.shayveri.core.ingress;
  *                plan's "raw snapshots are disposable".
  *                (import org.springframework.data.mongodb.core.index.Indexed)
  *
- * IMPORTANT (blueprint A3 note): index creation from annotations is OFF by
- * default in Spring Boot. Add to application.yml:
+ * IMPORTANT (blueprint A3 note):
+ *
+ * index creation from annotations is OFF by default in Spring Boot.
+ * Add to application.yml:
+ *
  *   spring.data.mongodb.auto-index-creation: true
+ *
  * so a fresh database gets the TTL index automatically. Without it the
  * annotation is decoration and nothing ever expires.
  *
@@ -39,13 +51,103 @@ package dev.shayveri.core.ingress;
  *      populate final-less fields via reflection; keep it simple: private
  *      fields, one constructor, getters.)
  *   4. A static factory tying the layers together:
- *        static TelemetrySnapshot from(TelemetrySnapshotRequest req, Instant receivedAt)
- *      so the service (A7) converts request -> document in one call and
- *      the conversion logic has exactly one home.
+ *      static TelemetrySnapshot from(TelemetrySnapshotRequest req, Instant
+ *      receivedAt) so the service (A7) converts request -> document in one
+ *      call and the conversion logic has exactly one home. Ddeliberately not
+ *      a field of TelemetrySnapshotRequest see idea generation.
+ *
+ *     Note:
+ *     Integer is java's object version of int, int cannot be null Integer
+ *     can, and Jackson then gives noll and @NotNull cleanly handles error.
+ *     object that can be null, thats it
  *
  * Done when: D3 shows an accepted snapshot in the collection with
  * receivedAt set, and the TTL index exists with 7-day expiry.
  */
+
+// for mongo db this java object becomees a document
+@Document("telemtry_snapshots")
 public class TelemetrySnapshot {
 
+    // --- fields ---
+    @Id private String id;
+    private String placeId;
+    private String jobId;.
+    private Integer playerCount;
+    private Double serverFps;
+    private String Round;
+    private Map,String, Object> customMetrics;
+    // tells MongoDB to create an index on that field and automatically
+    // delete old documents.
+    @Indexed(expireAfter = "7d") private Instant receivedAt;
+
+    // --- Default Constructor ---
+    public TelemetrySnapshot(
+            String placeId,
+            String jobId,
+            Integer playerCount,
+            Double serverFps,
+            String round,
+            Map<String, Object> customMetrics,
+            Instant receivedAt) {
+
+        this.placeId = placeId;
+        this.jobId = jobId;
+        this.playerCount = playerCount;
+        this.serverFps = serverFps;
+        this.round = round;
+        this.customMetrics = customMetrics;
+        this.receivedAt = receivedAt;
+
+    }
+
+    // --- Static object creation factory (calls dc above) --
+    public static TelemetrySnapshot from(
+            // paramaters bind call here
+            TelemetrySnapshotRequest request,
+            Instant receivedAt) {
+
+        return new TelemetrySnapshot(
+                request.placeId(),
+                request.jobId(),
+                request.playerCount(),
+                request.serverFps(),
+                request.round(),
+                request.customMetrics(),
+                receivedAt);
+
+    }
+
+    // --- getters (no setters per security model) ---
+    public String getId() {
+        return Id;
+    }
+
+    public String getPlaceId() {
+        return placeId;
+    }
+
+    public String getJobId() {
+        return jobId;
+    }
+
+    public Integer getPlayerCount() {
+        return playerCount;
+    }
+
+    public Double getServerFps() {
+        return serverFps;
+    }
+
+    public String getRound() {
+        return Round
+    }
+
+    public Instant getRecievedAt() {
+        return recievedAt
+    }
+
+    public Map<String, Object> getCustomMetrics() {
+        return Map.copyOf(customMetrics);
+    }
 }

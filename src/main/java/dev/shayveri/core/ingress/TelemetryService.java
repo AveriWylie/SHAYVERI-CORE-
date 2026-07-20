@@ -2,7 +2,7 @@ package dev.shayveri.core.ingress;
 
 import dev.shayveri.core.realtime.RealtimePublisher;
 import org.springframework.stereotype.Service;
-
+import java.time.Instant;
 import java.util.List;
 import java.util.concurrent.Executor;
 
@@ -18,6 +18,7 @@ import java.util.concurrent.Executor;
  *       bean injected is AsyncConfig's virtual-thread executor. Calling
  *       executor.execute(() -> { ... }) returns IMMEDIATELY; the lambda
  *       runs on its own virtual thread.
+ *
  * Depends on (ours): TelemetryStore (A5), RealtimePublisher (B1) - note
  * this class imports the INTERFACES, never MongoTelemetryStore or
  * StompRealtimePublisher. Spring injects the implementations.
@@ -39,11 +40,31 @@ import java.util.concurrent.Executor;
  *
  * Done when: D5 passes - the controller's 202 does not wait on storage.
  */
+
 @Service
 public class TelemetryService {
 
+	private final TelemetryStore TS;
+	private final RealtimePublisher RP;
+	private final Executor EX;
+
+	public TelemetryService(ts, rp, ex) {
+
+		this.TS = ts;
+		this .RP = rp;
+		this.EX = ex;
+
+	}
+
 	public void accept(TelemetrySnapshotRequest request) {
-		throw new UnsupportedOperationException("TODO(averi): implement per A7 step 2");
+
+		Instant recievedAt = Instant.now();
+		TelemetrySnapshot snapshot = TelemetrySnapshot.from(request, recievedAt);
+		ex.exuecute(() -> {
+			store.saveSnapshot(snapshot),
+			publisher.publish("/topic/telemetry/" + snapshot.getPlaceId(), snapshot)
+		})
+
 	}
 
 	public void acceptEvents(List<GameEventRequest> requests) {

@@ -1,6 +1,7 @@
 package dev.shayveri.core.ingress;
 
 import org.springframework.data.mongodb.repository.MongoRepository;
+import org.springframework.data.mongodb.repository.MongoRepository;
 
 /**
  * Consumed-API declaration for A6 - this interface has NO implementation
@@ -15,5 +16,5 @@ import org.springframework.data.mongodb.repository.MongoRepository;
  *
  * Given complete - there is nothing to implement, that is the feature.
  */
-interface TelemetrySnapshotRepository extends MongoRepository<TelemetrySnapshot, String> {
-}
+
+interface TelemetrySnapshotRepository extends MongoRepository<TelemetrySnapshot, String> { }

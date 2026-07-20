@@ -1,7 +1,7 @@
 package dev.shayveri.core.ingress;
 
+import java.util.List;
 import org.springframework.stereotype.Component;
-
 import java.util.List;
 
 /**
@@ -26,17 +26,28 @@ import java.util.List;
  * Done when: D3 passes - a saved snapshot appears in telemetry_snapshots,
  * a batch of 3 events becomes 3 documents in game_events.
  */
+
 @Component
 public class MongoTelemetryStore implements TelemetryStore {
 
-	@Override
-	public void saveSnapshot(TelemetrySnapshot snapshot) {
-		throw new UnsupportedOperationException("TODO(averi): implement per A6");
+	private final TelemetrySnapshotRepository SR;
+	private final GameEventRepository ER;
+
+	public MongoTelemetryStore(TelemetrySnapshotRepository SR, GameEventRepository ER) {
+
+		this.SR = SR;
+		this.ER = ER;
+
 	}
 
 	@Override
-	public void saveEvents(List<GameEvent> events) {
-		throw new UnsupportedOperationException("TODO(averi): implement per A6");
+	public void saveSnapshot(TelemetrySnapshot snapshot) {
+		SR.save(snapshot);
+	}
+
+	@Override
+	public void saveEvents(List,GameEvent> events) {
+		ER.save(events);
 	}
 
 }

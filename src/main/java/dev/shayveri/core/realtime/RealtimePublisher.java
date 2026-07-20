@@ -7,6 +7,7 @@ package dev.shayveri.core.realtime;
  * Consumes: nothing - ours. Given complete (contract interface, like A5).
  * Implementing it is B2.
  */
+
 public interface RealtimePublisher {
 
 	void publish(String topic, Object payload);

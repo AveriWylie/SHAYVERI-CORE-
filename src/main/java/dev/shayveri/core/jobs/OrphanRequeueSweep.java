@@ -1,6 +1,7 @@
 package dev.shayveri.core.jobs;
 
 import dev.shayveri.core.nodes.HeartbeatStore;
+import dev.shayveri.core.realtime.RealtimePublisher;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
